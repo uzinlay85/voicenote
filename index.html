@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Note</title>
+    
+    <!-- Google Fonts: Manrope for English, Padauk for Myanmar -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-content">
+                <h1>Voice Note</h1>
+                <p class="subtitle">အသံမှ စာသားသို့</p>
+            </div>
+            <button id="settings-btn" class="icon-btn" title="Settings">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </header>
+
+        <main>
+            <div id="transcription-area">
+                <div id="transcription-content">
+                    <p id="placeholder-text">အသံသွင်းရန် အောက်ကခလုတ်ကို နှိပ်ပါ...</p>
+                    <p id="transcribed-text"></p>
+                </div>
+                <button id="copy-btn" class="icon-btn copy-btn" title="Copy Text">
+                    <i class="fa-solid fa-copy"></i>
+                </button>
+            </div>
+        </main>
+
+        <footer>
+            <p id="status-text" class="status"></p>
+            <button id="record-btn" class="record-btn">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-btn" class="close-btn" title="Close">&times;</span>
+            <h2>Settings</h2>
+            <label for="api-key">Gemini API Key</label>
+            <input type="password" id="api-key" placeholder="Enter your Gemini API Key">
+            
+            <div class="api-key-help">
+                <p>
+                    Get your API key from 
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.
+                </p>
+            </div>
+            
+            <button id="save-settings-btn">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- Link to your JavaScript file -->
+    <script src="script.js"></script>
+
+</body>
+</html>
