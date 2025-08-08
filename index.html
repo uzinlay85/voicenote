@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Note</title>
     
-    <!-- Google Fonts: Manrope for English, Padauk for Myanmar -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
@@ -13,7 +13,6 @@
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     
-    <!-- Link to your CSS file -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,21 +30,43 @@
 
         <main>
             <div id="transcription-area">
-                <div id="transcription-content">
-                    <p id="placeholder-text">အသံသွင်းရန် အောက်ကခလုတ်ကို နှိပ်ပါ...</p>
-                    <p id="transcribed-text"></p>
+                <!-- Left Side: Original Text -->
+                <div class="text-container" id="original-container">
+                    <h3 class="text-label">မူရင်း (Original )</h3>
+                    <div class="text-content" id="original-text-content">
+                        <p id="placeholder-text">အသံသွင်းရန် (သို့) ဖိုင်တင်ရန် ခလုတ်ကို နှိပ်ပါ...</p>
+                    </div>
+                    <!-- NEW: Copy button for Original Text -->
+                    <button id="copy-original-btn" class="icon-btn copy-btn" title="Copy Original Text">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
                 </div>
-                <button id="copy-btn" class="icon-btn copy-btn" title="Copy Text">
-                    <i class="fa-solid fa-copy"></i>
-                </button>
+
+                <!-- Right Side: Corrected Text -->
+                <div class="text-container" id="corrected-container">
+                    <h3 class="text-label">ပြင်ဆင်ပြီး (Corrected)</h3>
+                    <div class="text-content" id="corrected-text-content">
+                        <!-- Content will be added by JS -->
+                    </div>
+                    <!-- Renamed ID for clarity -->
+                    <button id="copy-corrected-btn" class="icon-btn copy-btn" title="Copy Corrected Text">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
             </div>
         </main>
 
         <footer>
             <p id="status-text" class="status"></p>
-            <button id="record-btn" class="record-btn">
-                <i class="fa-solid fa-microphone"></i>
-            </button>
+            <div class="button-container">
+                <button id="record-btn" class="record-btn" title="Live Record">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button id="upload-btn" class="icon-btn upload-btn" title="Upload Audio File">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                </button>
+            </div>
+            <input type="file" id="audio-upload-input" accept="audio/*" style="display: none;">
         </footer>
     </div>
 
@@ -68,7 +89,6 @@
         </div>
     </div>
 
-    <!-- Link to your JavaScript file -->
     <script src="script.js"></script>
 
 </body>

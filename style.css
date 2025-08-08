@@ -27,7 +27,7 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 380px;
+    max-width: 700px;
     background: var(--container-bg);
     border-radius: 32px;
     box-shadow: 0 10px 40px var(--shadow-light);
@@ -45,6 +45,7 @@ header {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .header-content h1 {
@@ -60,51 +61,85 @@ header {
     margin-top: 2px;
 }
 
-/* Main Content */
+/* Main Content Area */
 main {
     flex-grow: 1;
     display: flex;
     margin-top: 16px;
-    position: relative;
+    min-height: 0;
 }
 
 #transcription-area {
     flex-grow: 1;
-    background-color: #f7f7f7;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    border: 2px dashed transparent;
     border-radius: 24px;
-    padding: 20px;
-    overflow-y: auto;
-    position: relative;
-    border: 1px solid var(--border-color);
+    transition: border-color 0.3s;
 }
 
-#transcription-content {
-    font-size: 1.05em;
+.text-container {
+    background-color: #f7f7f7;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.text-label {
+    font-size: 0.8em;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 10px 20px;
+    background-color: #efefef;
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+    text-align: center;
+}
+
+.text-content {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    font-size: 1em;
     line-height: 1.7;
     color: var(--text-primary);
+    word-wrap: break-word;
 }
 
 #placeholder-text {
     color: #a0a0a0;
+    text-align: center;
+    padding-top: 20px;
 }
 
 .copy-btn {
     position: absolute;
-    top: 16px;
-    right: 16px;
+    top: 6px;
+    right: 10px;
     background-color: #fff;
     border: 1px solid var(--border-color);
-    display: none;
+    display: none; /* Initially hidden, shown by JS */
+    z-index: 10;
 }
 
-/* --- Footer (Updated for Centering) --- */
+/* Drag and Drop Style */
+#transcription-area.drag-over {
+    border-color: var(--accent-color);
+}
+
+/* Footer */
 footer {
-    /* Use flexbox for perfect centering */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding-top: 20px;
+    flex-shrink: 0;
 }
 
 .status {
@@ -112,6 +147,12 @@ footer {
     min-height: 20px;
     margin-bottom: 16px;
     font-size: 0.9em;
+}
+
+.button-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .record-btn {
@@ -129,7 +170,6 @@ footer {
     justify-content: center;
     align-items: center;
 }
-/* --- End of Footer Update --- */
 
 .record-btn:hover {
     transform: translateY(-3px);
@@ -159,6 +199,12 @@ footer {
 .icon-btn:hover {
     background-color: #e8e8e8;
     border-color: #dcdcdc;
+}
+
+.upload-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5em;
 }
 
 /* Settings Modal */

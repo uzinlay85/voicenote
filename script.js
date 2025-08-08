@@ -1,10 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Element References ---
     const recordBtn = document.getElementById('record-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const audioUploadInput = document.getElementById('audio-upload-input');
     const statusText = document.getElementById('status-text');
-    const transcribedText = document.getElementById('transcribed-text');
+    const transcriptionArea = document.getElementById('transcription-area');
+    
+    const originalTextContent = document.getElementById('original-text-content');
+    const correctedTextContent = document.getElementById('corrected-text-content');
     const placeholderText = document.getElementById('placeholder-text');
-    const copyBtn = document.getElementById('copy-btn');
+    
+    // NEW: References for both copy buttons
+    const copyOriginalBtn = document.getElementById('copy-original-btn');
+    const copyCorrectedBtn = document.getElementById('copy-corrected-btn');
 
     // Settings Modal elements
     const settingsBtn = document.getElementById('settings-btn');
@@ -25,16 +33,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
     recordBtn.addEventListener('click', toggleRecording);
-    settingsBtn.addEventListener('click', () => {
-        settingsModal.style.display = 'block';
+    uploadBtn.addEventListener('click', () => audioUploadInput.click());
+    audioUploadInput.addEventListener('change', handleFileUpload);
+
+    // Drag and Drop Event Listeners
+    transcriptionArea.addEventListener('dragenter', handleDragEvent);
+    transcriptionArea.addEventListener('dragover', handleDragEvent);
+    transcriptionArea.addEventListener('dragleave', handleDragLeave);
+    transcriptionArea.addEventListener('drop', handleDrop);
+
+    // NEW: Event listeners for both copy buttons
+    copyOriginalBtn.addEventListener('click', () => {
+        copyText(originalTextContent.textContent);
     });
-    closeBtn.addEventListener('click', () => {
-        settingsModal.style.display = 'none';
+
+    copyCorrectedBtn.addEventListener('click', () => {
+        copyText(correctedTextContent.textContent);
     });
-    window.addEventListener('click', (event) => {
-        if (event.target == settingsModal) {
-            settingsModal.style.display = 'none';
+
+    function copyText(text) {
+        if (text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy text.');
+            });
         }
+    }
+
+    function handleDragEvent(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        transcriptionArea.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        transcriptionArea.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+        handleDragLeave(e);
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('audio/')) {
+                processUploadedFile(file);
+            } else {
+                alert('Please drop an audio file.');
+            }
+        }
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            processUploadedFile(file);
+            audioUploadInput.value = '';
+        }
+    }
+    
+    function processUploadedFile(file) {
+        if (!geminiApiKey) {
+            alert('Please set your Gemini API Key in the settings first.');
+            settingsModal.style.display = 'block';
+            return;
+        }
+        processAudio(file);
+    }
+
+    settingsBtn.addEventListener('click', () => settingsModal.style.display = 'block');
+    closeBtn.addEventListener('click', () => settingsModal.style.display = 'none');
+    window.addEventListener('click', (event) => {
+        if (event.target == settingsModal) settingsModal.style.display = 'none';
     });
     saveSettingsBtn.addEventListener('click', () => {
         geminiApiKey = apiKeyInput.value.trim();
@@ -44,18 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Settings saved!');
         } else {
             alert('Please enter a valid API Key.');
-        }
-    });
-
-    copyBtn.addEventListener('click', () => {
-        const textToCopy = transcribedText.textContent;
-        if (textToCopy) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Copied to clipboard!');
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                alert('Failed to copy text.');
-            });
         }
     });
 
@@ -81,8 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 recordBtn.querySelector('i').className = 'fa-solid fa-stop';
                 statusText.textContent = 'Recording...';
                 placeholderText.style.display = 'none';
-                transcribedText.textContent = '';
-                copyBtn.style.display = 'none';
+                originalTextContent.textContent = '';
+                correctedTextContent.textContent = '';
+                copyOriginalBtn.style.display = 'none';
+                copyCorrectedBtn.style.display = 'none';
             };
 
             mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
@@ -91,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 isRecording = false;
                 recordBtn.classList.remove('recording');
                 recordBtn.querySelector('i').className = 'fa-solid fa-microphone';
-                statusText.textContent = 'Step 1: Transcribing audio...';
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 await processAudio(audioBlob);
                 stream.getTracks().forEach(track => track.stop());
@@ -117,21 +179,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function processAudio(audioBlob) {
+    async function processAudio(audioData) {
+        placeholderText.style.display = 'none';
+        originalTextContent.textContent = '';
+        correctedTextContent.textContent = '';
+        copyOriginalBtn.style.display = 'none';
+        copyCorrectedBtn.style.display = 'none';
+        statusText.textContent = 'Step 1: Transcribing audio...';
+
         try {
-            const rawText = await transcribeAudioWithGemini(audioBlob);
+            const rawText = await transcribeAudioWithGemini(audioData);
             if (!rawText) {
                 statusText.textContent = 'Could not transcribe audio. Please try again.';
+                placeholderText.style.display = 'block';
                 return;
             }
-            transcribedText.textContent = rawText;
+            originalTextContent.textContent = rawText;
+            copyOriginalBtn.style.display = 'flex'; // Show original copy button
             
             statusText.textContent = 'Step 2: Correcting spelling...';
             const proofreadText = await proofreadTextWithGemini(rawText);
             
-            document.getElementById('transcription-content').textContent = proofreadText;
-            statusText.textContent = 'Transcription complete.';
-            copyBtn.style.display = 'flex';
+            correctedTextContent.textContent = proofreadText;
+            statusText.textContent = 'Comparison complete.';
+            copyCorrectedBtn.style.display = 'flex'; // Show corrected copy button
 
         } catch (error) {
             console.error('Error during processing:', error);
@@ -139,15 +210,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- UPDATED TRANSCRIPTION FUNCTION ---
-    async function transcribeAudioWithGemini(audioBlob) {
-        const base64Audio = await blobToBase64(audioBlob);
+    async function transcribeAudioWithGemini(audioData) {
+        const base64Audio = await blobToBase64(audioData);
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
         
         const prompt = "Transcribe the following audio. The primary language is Burmese (Myanmar ), but it may contain a few English words. Please keep the English words in their original English form.";
+        const mimeType = audioData.type || 'audio/webm';
 
         const requestBody = {
-            "contents": [{"parts": [{"text": prompt}, {"inline_data": {"mime_type": "audio/webm", "data": base64Audio}}]}]
+            "contents": [{"parts": [{"text": prompt}, {"inline_data": {"mime_type": mimeType, "data": base64Audio}}]}]
         };
         const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
         if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
@@ -155,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
 
-    // --- UPDATED PROOFREADING FUNCTION ---
     async function proofreadTextWithGemini(text) {
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
         
