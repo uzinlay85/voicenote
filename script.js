@@ -6,12 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusText = document.getElementById('status-text');
     const transcriptionArea = document.getElementById('transcription-area');
     
-    const originalTextContent = document.getElementById('original-text-content');
-    const correctedTextContent = document.getElementById('corrected-text-content');
+    // UPDATED: Back to single content area
+    const transcriptionContent = document.getElementById('transcription-content');
     const placeholderText = document.getElementById('placeholder-text');
-    
-    const copyOriginalBtn = document.getElementById('copy-original-btn');
-    const copyCorrectedBtn = document.getElementById('copy-corrected-btn');
+    const copyBtn = document.getElementById('copy-btn');
 
     // Settings Modal elements
     const settingsBtn = document.getElementById('settings-btn');
@@ -41,24 +39,17 @@ document.addEventListener('DOMContentLoaded', () => {
     transcriptionArea.addEventListener('dragleave', handleDragLeave);
     transcriptionArea.addEventListener('drop', handleDrop);
 
-    copyOriginalBtn.addEventListener('click', () => {
-        copyText(originalTextContent.textContent);
-    });
-
-    copyCorrectedBtn.addEventListener('click', () => {
-        copyText(correctedTextContent.textContent);
-    });
-
-    function copyText(text) {
-        if (text) {
-            navigator.clipboard.writeText(text).then(() => {
+    copyBtn.addEventListener('click', () => {
+        const textToCopy = transcriptionContent.textContent;
+        if (textToCopy && textToCopy !== placeholderText.textContent) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 alert('Copied to clipboard!');
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
                 alert('Failed to copy text.');
             });
         }
-    }
+    });
 
     function handleDragEvent(e) {
         e.preventDefault();
@@ -140,10 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 recordBtn.querySelector('i').className = 'fa-solid fa-stop';
                 statusText.textContent = 'Recording...';
                 placeholderText.style.display = 'none';
-                originalTextContent.textContent = '';
-                correctedTextContent.textContent = '';
-                copyOriginalBtn.style.display = 'none';
-                copyCorrectedBtn.style.display = 'none';
+                transcriptionContent.textContent = '';
+                copyBtn.style.display = 'none';
             };
 
             mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
@@ -177,30 +166,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // UPDATED: processAudio to show final result in one box
     async function processAudio(audioData) {
         placeholderText.style.display = 'none';
-        originalTextContent.textContent = '';
-        correctedTextContent.textContent = '';
-        copyOriginalBtn.style.display = 'none';
-        copyCorrectedBtn.style.display = 'none';
-        statusText.textContent = 'Step 1: Transcribing audio...';
+        transcriptionContent.textContent = '';
+        copyBtn.style.display = 'none';
+        statusText.textContent = 'Processing... (Step 1 of 2)';
 
         try {
+            // Step 1: Get raw transcription (in the background)
             const rawText = await transcribeAudioWithGemini(audioData);
             if (!rawText) {
                 statusText.textContent = 'Could not transcribe audio. Please try again.';
+                transcriptionContent.appendChild(placeholderText);
                 placeholderText.style.display = 'block';
                 return;
             }
-            originalTextContent.textContent = rawText;
-            copyOriginalBtn.style.display = 'flex';
             
-            statusText.textContent = 'Step 2: Correcting and improving text...';
+            // Step 2: Get proofread text (in the background)
+            statusText.textContent = 'Refining text... (Step 2 of 2)';
             const proofreadText = await proofreadTextWithGemini(rawText);
             
-            correctedTextContent.textContent = proofreadText;
-            statusText.textContent = 'Comparison complete.';
-            copyCorrectedBtn.style.display = 'flex';
+            // Final Step: Display the single, corrected result
+            transcriptionContent.textContent = proofreadText;
+            statusText.textContent = 'Transcription complete.';
+            copyBtn.style.display = 'flex';
 
         } catch (error) {
             console.error('Error during processing:', error);
@@ -224,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
 
-    // --- UPDATED: proofreadTextWithGemini function with a more powerful prompt ---
     async function proofreadTextWithGemini(text) {
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
         
