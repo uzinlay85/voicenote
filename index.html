@@ -18,6 +18,12 @@
 <body>
 
     <div class="app-container">
+        <!-- NEW: Custom Notification Bar -->
+        <div id="notification" class="notification">
+            <span id="notification-text"></span>
+            <button id="notification-close-btn" class="notification-close-btn">&times;</button>
+        </div>
+
         <header>
             <div class="header-content">
                 <h1>Voice Note</h1>
@@ -28,7 +34,6 @@
             </button>
         </header>
 
-        <!-- UPDATED: Main area back to a single view -->
         <main>
             <div id="transcription-area">
                 <div id="transcription-content">
