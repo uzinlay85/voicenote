@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const correctedTextContent = document.getElementById('corrected-text-content');
     const placeholderText = document.getElementById('placeholder-text');
     
-    // NEW: References for both copy buttons
     const copyOriginalBtn = document.getElementById('copy-original-btn');
     const copyCorrectedBtn = document.getElementById('copy-corrected-btn');
 
@@ -42,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     transcriptionArea.addEventListener('dragleave', handleDragLeave);
     transcriptionArea.addEventListener('drop', handleDrop);
 
-    // NEW: Event listeners for both copy buttons
     copyOriginalBtn.addEventListener('click', () => {
         copyText(originalTextContent.textContent);
     });
@@ -195,14 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             originalTextContent.textContent = rawText;
-            copyOriginalBtn.style.display = 'flex'; // Show original copy button
+            copyOriginalBtn.style.display = 'flex';
             
-            statusText.textContent = 'Step 2: Correcting spelling...';
+            statusText.textContent = 'Step 2: Correcting and improving text...';
             const proofreadText = await proofreadTextWithGemini(rawText);
             
             correctedTextContent.textContent = proofreadText;
             statusText.textContent = 'Comparison complete.';
-            copyCorrectedBtn.style.display = 'flex'; // Show corrected copy button
+            copyCorrectedBtn.style.display = 'flex';
 
         } catch (error) {
             console.error('Error during processing:', error);
@@ -226,17 +224,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
 
+    // --- UPDATED: proofreadTextWithGemini function with a more powerful prompt ---
     async function proofreadTextWithGemini(text) {
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
         
-        const prompt = `The following text is primarily in Burmese. Please perform these specific corrections:
-1.  Correct only obvious Burmese spelling mistakes.
-2.  Apply Burmese punctuation rules, such as using '။' (ပုဒ်မ ) at the end of sentences instead of a period (.).
-3.  Do not change or translate any English words found in the text.
-4.  Do not rephrase sentences or change the original meaning.
-If the text is already correct, return it as is.
+        const prompt = `
+You are an expert editor specializing in the Burmese (Myanmar ) language. Your task is to correct and refine the following text, which was transcribed from speech. Follow these rules strictly:
 
-Text to correct: "${text}"`;
+1.  **Primary Goal:** Improve the text to meet a high standard of written Burmese, as if for a formal document or publication.
+2.  **Spelling Correction:** Correct all Burmese spelling mistakes according to the official Myanmar Language Commission dictionary.
+3.  **Punctuation:**
+    *   Use '။' (ပုဒ်မ) to end sentences.
+    *   Use '၊' (ပုဒ်ဖြတ်) where appropriate for pauses within sentences.
+    *   Remove unnecessary spaces before or after punctuation.
+4.  **Grammar and Flow:**
+    *   Correct grammatical errors.
+    *   Improve sentence structure for better readability and flow, but only if necessary.
+    *   Choose more appropriate or formal vocabulary where it enhances clarity (e.g., change "လုပ်တယ်" to "ဆောင်ရွက်သည်" in a formal context), but be careful not to alter the core meaning.
+5.  **Strict Constraints:**
+    *   **DO NOT** change the original meaning or intent of the sentences. Your role is to correct and refine, not to rewrite.
+    *   **DO NOT** translate or alter any English words or technical terms present in the text. Keep them as they are.
+    *   **DO NOT** add any comments, explanations, or introductory phrases to your response.
+6.  **Output:** Provide only the fully corrected and refined Burmese text as the final output.
+
+Here is the text to be corrected:
+"${text}"
+`;
 
         const requestBody = {
             "contents": [{"parts": [{"text": prompt}]}]
