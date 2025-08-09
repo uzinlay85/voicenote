@@ -28,31 +28,15 @@
             </button>
         </header>
 
+        <!-- UPDATED: Main area back to a single view -->
         <main>
             <div id="transcription-area">
-                <!-- Left Side: Original Text -->
-                <div class="text-container" id="original-container">
-                    <h3 class="text-label">မူရင်း (Original )</h3>
-                    <div class="text-content" id="original-text-content">
-                        <p id="placeholder-text">အသံသွင်းရန် (သို့) ဖိုင်တင်ရန် ခလုတ်ကို နှိပ်ပါ...</p>
-                    </div>
-                    <!-- NEW: Copy button for Original Text -->
-                    <button id="copy-original-btn" class="icon-btn copy-btn" title="Copy Original Text">
-                        <i class="fa-solid fa-copy"></i>
-                    </button>
+                <div id="transcription-content">
+                    <p id="placeholder-text">အသံသွင်းရန် (သို့ ) ဖိုင်တင်ရန် ခလုတ်ကို နှိပ်ပါ...</p>
                 </div>
-
-                <!-- Right Side: Corrected Text -->
-                <div class="text-container" id="corrected-container">
-                    <h3 class="text-label">ပြင်ဆင်ပြီး (Corrected)</h3>
-                    <div class="text-content" id="corrected-text-content">
-                        <!-- Content will be added by JS -->
-                    </div>
-                    <!-- Renamed ID for clarity -->
-                    <button id="copy-corrected-btn" class="icon-btn copy-btn" title="Copy Corrected Text">
-                        <i class="fa-solid fa-copy"></i>
-                    </button>
-                </div>
+                <button id="copy-btn" class="icon-btn copy-btn" title="Copy Text">
+                    <i class="fa-solid fa-copy"></i>
+                </button>
             </div>
         </main>
 
@@ -70,21 +54,16 @@
         </footer>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- Settings Modal (No changes needed here) -->
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <span id="close-btn" class="close-btn" title="Close">&times;</span>
             <h2>Settings</h2>
             <label for="api-key">Gemini API Key</label>
             <input type="password" id="api-key" placeholder="Enter your Gemini API Key">
-            
             <div class="api-key-help">
-                <p>
-                    Get your API key from 
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.
-                </p>
+                <p>Get your API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.</p>
             </div>
-            
             <button id="save-settings-btn">Save Settings</button>
         </div>
     </div>
